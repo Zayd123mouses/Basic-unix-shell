@@ -74,8 +74,8 @@ void (* printError)() = Error_printer; //  function pointer to print errors
 
    while ( getline( &str, &s, file )  > -1 )  //reead the input from the file
    {
-     char *temp = calloc(strlen(str) + 1, sizeof(char)); // hold the the string to be muted
-     strcpy( temp, str );
+   //   char *temp = calloc(strlen(str) + 1, sizeof(char)); // hold the the string to be muted
+   //   strcpy( temp, str );
      char *ptr;
      size_t command_index = 0;     
      char *commands[256];
@@ -86,14 +86,21 @@ void (* printError)() = Error_printer; //  function pointer to print errors
           strcpy( commands[command_index], ptr );
          command_index++;
       }
+    
     }
 
     if(command_index > 0 ){
     commands[command_index] = NULL;
     }
-
+   free(str);
+   wait(NULL);
    main_parser(commands, command_index);
+   
+    
   }
+  
+
+
  free(str);
  return 0;
 }
@@ -120,25 +127,39 @@ char *myargv[100];
       }
       
       if((int)built_in_commands(myargv,command_tracker) > -1) {
+         
          return;
       }
-      
+      free(command);
+      free(commands[i]);
       int rc = fork();
       if( rc == 0) {
+         
       parse_command(myargv, command_tracker);
-      exit(0);
+    
       }else{
+        
+         size_t i = 0;
+         while( i < command_tracker && myargv[i] != NULL) {
+            free(myargv[i]);
+            myargv[i] = NULL;
+            i++;
+         }
       }
+    
    }
+    
  size_t i = 0;
          while( i < command_index && commands[i] != NULL) {
-            free(commands[i]);
+            
             commands[i] = NULL;
             i++;
          }
+wait(NULL);
 }
 
 size_t built_in_commands (char ** commands, size_t command_index ) {
+   
     if(command_index == 0){
       return 0;
     }
@@ -148,6 +169,7 @@ size_t built_in_commands (char ** commands, size_t command_index ) {
            Error_printer();
            return 0;
       }else{
+        wait(NULL);
          exit(0);
       }
       
